@@ -1,0 +1,1 @@
+// This file is for : QR code generation and handling. 
