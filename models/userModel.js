@@ -6,13 +6,13 @@
   - Password - make sure is of correct size. 
   - Hashed password via 
   - Privilege status - admin or user 
-
+  - Points they have.
 Model would need to have fields for all of these, and would need username and password to be required fields.
 Authorisation controller will handle the authentication part, as well as checking the username and password are valid. 
 
 */
 
-const mongoDB = require('mongoose');
+const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
   username : {
@@ -38,5 +38,6 @@ const userSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+const User = mongoose.model('User', userSchema);
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = User;

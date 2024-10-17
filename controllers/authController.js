@@ -1,70 +1,87 @@
-// This file is for : handling registration and login logic. 
-const bcrypt = require('bycryptjs');
-const User = require('../models/userModel.js');
-const jwt  = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');                   // Import to hash passwords. 
+const User = require('../models/userModel.js');       // Import userModel module.
+const jwt  = require('jsonwebtoken');                 // Import to generate json web tokens. 
 
-exports.register =  async (req, res, next) => {
-    try {
 
-    const { username, password, role} = req.body;
+exports.register = async (req, res, next) => {
+  try {
+    const { username, password, role } = req.body;
+    // console.log('Register request:', req.body);
+
+    if (!username || !password) {
+      // console.log('Validation error: Username or password missing.');
+      return res.status(400).json({ message: 'Sorry, the password and username are required fields.' });
+    }
+
     const existingUser = await User.findOne({ username });
-        
     if (existingUser) {
-      return res.status(400).json({ message : 'This username already exists.'});
+      // console.log('User already exists:', existingUser);
+      return res.status(400).json({ message: 'This username already exists.' });
     }
 
-    if (password.length < 6 || password.length > 128){
-      return res.status(400).json({ message : 'Sorry, your password needs to be between 6 and 128 characters long.'})
+    if (password.length < 6 || password.length > 128) {
+      // console.log('Validation error: Invalid password length.');
+      return res.status(400).json({ message: 'Sorry, your password needs to be between 6 and 128 characters long.' });
     }
-    
+
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+    // console.log('Password hashed successfully.');
+
     const newUser = new User({
-      username: username, 
+      username,
       password: hashedPassword,
       role: role || 'user'
     });
 
     await newUser.save();
+    // console.log('New user created:', newUser);
 
-    res.status(201).json({ message : 'A new user has been created successfully.'});
+    res.status(201).json({ message: 'A new user has been created successfully.' });
 
   } catch (error) {
+    // console.error('Error during registration:', error);
     next(error);
   }
-
-}
+};
 
 // User login process - authenticate user, log them in, generate JWT token. 
-exports.login = async(req, res, next) => {
+exports.login = async (req, res, next) => {
   try {
     const { username, password } = req.body;
-    const user = await User.findOne({username});
+    // console.log('Login request:', req.body);
 
-    // If user does not exist, exit with error.
-    if (!user){
-      res.status(400).json({ message : 'Sorry, we have no record of that username.'});
+    if (!username || !password) {
+      // console.log('Validation error: Username or password missing.');
+      return res.status(400).json({ message: 'Sorry, the password and username are required fields.' });
     }
 
-    // Compare password with encrypted one.
+    const user = await User.findOne({ username }).select('+password');
+    // console.log('User retrieved for login:', user);
+
+    if (!user) {
+      // console.log('User not found:', username);
+      return res.status(400).json({ message: 'Sorry, we have no record of that username.' });
+    }
+
+    // console.log('User found:', user);
+
     const isMatch = await bcrypt.compare(password, user.password);
-
-    // If user does exist, but password does not match, exit with error.
-    if (!isMatch){
-      res.status(400).json({ message : 'Sorry, the password and username do not match.'});
+    if (!isMatch) {
+      // console.log('Password mismatch for user:', username);
+      return res.status(400).json({ message: 'Sorry, the password and username do not match.' });
     }
 
-    // Generate the JWT token for the user.
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '1h'}
-    )
+      { expiresIn: '1h' }
+    );
+    // console.log('Token generated for user:', user._id);
 
     res.status(200).json({ token });
 
-  } catch (error){
+  } catch (error) {
+    // console.error('Error during login:', error);
     next(error);
   }
-
-}
+};

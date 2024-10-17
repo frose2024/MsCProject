@@ -4,15 +4,13 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
-const connectDB = require('./config/db');
+const { connectDB } = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 
 
 // Initialising express. 
 const app  = express();
 
-// Setting port variable to port 5000.
-const PORT = process.env.PORT || 5000;
 
 connectDB()
   .then(() => console.log("Connected to the database successfully."))
@@ -25,7 +23,11 @@ app.use(express.json());   // Parses incoming JSON requests.
 
 app.use('/api/auth', authRoutes);   // Setting base path for the authentication-related routes.
 
-// 404 handler for is a requested route doesn't exist. 
+app.get('/api/trigger-error', (req, res, next) => {
+  next(new Error('Simulated server error'));  // Simulating an unhandled error for test purpose. 
+});
+
+// 404 handler is for a requested route doesn't exist. 
 app.use((req, res, next) => {
    res.status(404).json({ message: 'Route not found' });
  });
@@ -63,13 +65,15 @@ app.use((err, req, res, next) => {
 
 // Suggested improvement, 'graceful shutdown' handler?
 
+// Start server listening only when not in test mode
+if (process.env.NODE_ENV !== 'test') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server is listening on port ${PORT}`);
+  });
+}
 
-// Start server listening, log that it is listening. 
-app.listen(PORT, () => {
-  console.log(`Server is listening on port ${PORT}`);
-})
-
-
+module.exports = app;
 
 // Suggested security middleware :
    // helemt to set HTTP headers
