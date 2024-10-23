@@ -3,9 +3,13 @@
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",
+    "expo": "^51.0.38",
     "express": "^4.21.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.7.0"
+    "mongoose": "^8.7.0",
+    "react-native": "0.74.5",
+    "typescript": "~5.3.3",
+    "@types/react": "~18.2.79"
   },
   "scripts": {
     "start": "node server.js",
