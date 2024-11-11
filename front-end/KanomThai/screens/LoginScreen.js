@@ -30,31 +30,27 @@ export default function LoginScreen({ navigation, setIsLoggedIn, setIsAdmin, set
   const handleLogin = async () => {
     try {
       const response = await login(identifier, password);
-      console.log('Login response:', response);
+      //Debug: console.log('Login response:', response);
   
       const { role, token } = response || {};
-  
-      // Decode the token to extract userId
+      
       const decodedToken = decodeJWT(token);
       const userId = decodedToken?.userId;
   
-      // Verify that userId and token are present
       if (!userId || !token) {
         throw new Error('Login response is missing userId or token.');
       }
   
-      // Log to confirm successful login and extracted values
-      console.log('Login successful. userId:', userId, 'role:', role, 'token:', token);
+      //Debug: console.log('Login successful. userId:', userId, 'role:', role, 'token:', token);
   
-      // Set state and navigate
       setIsLoggedIn(true);
       setIsAdmin(role === 'admin');
-      setUserId(userId);  // Ensure setUserId is defined and correctly setting the state
-      setToken(token);     // Ensure setToken is defined and correctly setting the state
+      setUserId(userId);
+      setToken(token); 
   
       navigation.navigate('MainTabs');
     } catch (error) {
-      console.error('Login failed:', error);
+      //Debug: console.error('Login failed:', error);
       Alert.alert('Login Error', error.message || 'An unexpected error occurred.');
     }
   };  
