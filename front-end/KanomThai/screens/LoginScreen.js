@@ -1,0 +1,131 @@
+import React, { useState } from 'react';
+import { View, TextInput, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import axios from 'axios';
+
+import ScreenTemplate from '../components/ScreenTemplate';
+import { login } from '../APIs.js/LoginAndRegistration';
+
+const decodeJWT = (token) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('Failed to decode token:', error);
+    return null;
+  }
+};
+
+
+export default function LoginScreen({ navigation, setIsLoggedIn, setIsAdmin, setUserId, }) {
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleLogin = async () => {
+    try {
+      const response = await login(identifier, password);
+      console.log('Login response:', response);
+  
+      const { role, token } = response || {};
+  
+      // Decode the token to extract userId
+      const decodedToken = decodeJWT(token);
+      const userId = decodedToken?.userId;
+  
+      // Verify that userId and token are present
+      if (!userId || !token) {
+        throw new Error('Login response is missing userId or token.');
+      }
+  
+      // Log to confirm successful login and extracted values
+      console.log('Login successful. userId:', userId, 'role:', role, 'token:', token);
+  
+      // Set state and navigate
+      setIsLoggedIn(true);
+      setIsAdmin(role === 'admin');
+      setUserId(userId);  // Ensure setUserId is defined and correctly setting the state
+      setToken(token);     // Ensure setToken is defined and correctly setting the state
+  
+      navigation.navigate('MainTabs');
+    } catch (error) {
+      console.error('Login failed:', error);
+      Alert.alert('Login Error', error.message || 'An unexpected error occurred.');
+    }
+  };  
+  
+  return (
+    <ScreenTemplate>
+      <View style={styles.formContainer}>
+      
+        <TextInput
+          placeholder="Username or Email"
+          value={identifier}
+          onChangeText={setIdentifier}
+          style={styles.input}
+        />
+      
+        <TextInput
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          style={styles.input}
+        />
+
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+          <Text style={styles.loginButtonText}> LOGIN </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Registration')}>
+         <Text style={styles.registerLink}> Don't have an account? Register here. </Text>
+        </TouchableOpacity>
+
+      </View>
+    </ScreenTemplate>
+    );
+}
+
+const styles = StyleSheet.create({
+  formContainer: {
+    paddingHorizontal: 20,
+    alignItems: 'center',
+  },
+  input: {
+    width: '100%',
+    height: 40,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    marginBottom: 20,
+    fontSize: 16,
+    paddingHorizontal: 10,
+    fontFamily: 'Montserrat'
+  },
+  loginButton: {
+    width: '75%',
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderRadius: 5,
+    marginTop: 20,
+  },
+  loginButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    fontFamily: 'Montserrat',
+    fontWeight: 'bold',
+  },
+  registerLink: {
+    color: '#007AFF',
+    marginTop: 20,
+    fontSize: 16,
+    fontFamily: 'Montserrat'
+  },
+});
