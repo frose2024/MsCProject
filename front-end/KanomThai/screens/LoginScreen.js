@@ -31,6 +31,7 @@ export default function LoginScreen({ navigation, setIsLoggedIn, setIsAdmin, set
   const handleLogin = async () => {
     try {
       const response = await login(identifier, password);
+
       const { role, token } = response || {};
       const decodedToken = decodeJWT(token);
       const userId = decodedToken?.userId;
@@ -39,12 +40,15 @@ export default function LoginScreen({ navigation, setIsLoggedIn, setIsAdmin, set
         throw new Error('Login response is missing userId or token.');
       }
 
-      await AsyncStorage.setItem('token', token);
-      await AsyncStorage.setItem('userId', userId);
-
       setUserId(userId);
       setIsAdmin(role === 'admin');
       setIsLoggedIn(true);
+
+      await AsyncStorage.setItem('token', token);
+      await AsyncStorage.setItem('userId', userId);
+
+      navigation.navigate('MainTabs');
+
     } catch (error) {
       console.error('Login failed:', error);
       Alert.alert('Login Error', error.message || 'An unexpected error occurred.');
