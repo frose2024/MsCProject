@@ -4,26 +4,23 @@ import { View, StyleSheet, SafeAreaView, Image } from 'react-native';
 export default function ScreenTemplate({ children, showNavBar = false }) {
   return (
     <SafeAreaView style={styles.container}>
-      {/* Top Decoration Leaves */}
+
       <View style={styles.topDecorContainer}>
         <Image source={require('../assets/greyLeafLeft.png')} style={styles.topLeftLeaf} />
         <Image source={require('../assets/greyLeafRight.png')} style={styles.topRightLeaf} />
       </View>
 
-      {/* Logo Section */}
       <View style={styles.logoContainer}>
         <Image source={require('../assets/logo.png')} style={styles.logo} />
       </View>
 
-      {/* Main Content */}
       <View style={styles.content}>
         {children}
       </View>
 
-      {/* Bottom Decorations */}
       <View style={styles.bottomDecorContainer}>
-        <Image source={require('../assets/greenLeafLeft.png')} style={styles.bottomLeftFlower} />
-        <Image source={require('../assets/greenLeafRight.png')} style={styles.bottomRightFlower} />
+        <Image source={require('../assets/greenLLeft.png')} style={styles.bottomLeftFlower} />
+        <Image source={require('../assets/greenLRight.png')} style={styles.bottomRightFlower} />
       </View>
 
       {showNavBar && (

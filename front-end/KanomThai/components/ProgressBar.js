@@ -12,6 +12,10 @@ const ProgressBar = ({ points }) => {
         {progress < 1 && (
           <View style={[styles.stripedOverlay, { left: `${progress * 100}%` }]} />
         )}
+
+        <View style={styles.pointsContainer}>
+          <Text style={styles.pointsLabel}>{points} Points</Text>
+        </View>
       </View>
       <Text style={styles.pointsText}>
         {points >= 100
@@ -38,16 +42,23 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: '100%',
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#155c20',
     borderRadius: 10,
   },
-  stripedOverlay: {
+  pointsContainer: {
     position: 'absolute',
-    height: '100%',
-    width: '100%',
-    backgroundColor: 'rgba(0, 0, 0, 0.05)',
-    backgroundImage: 'repeating-linear-gradient(45deg, #ddd, #ddd 10px, transparent 10px, transparent 20px)',
-    zIndex: 1,
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  pointsLabel: {
+    fontSize: 14,
+    color: '#fffff',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
   pointsText: {
     fontSize: 18,

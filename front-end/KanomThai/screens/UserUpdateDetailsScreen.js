@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet } from 'react-native';
-import ScreenTemplate from '../components/ScreenTemplate';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-import { getProfile } from '../APIs.js/GetProfile';
-import { updateUserInformation } from '../APIs.js/UpdateUserInformation';
+import ScreenTemplate from '../components/ScreenTemplate';
+import { getProfile } from '../APIs/GetProfile';
+import { updateUserInformation } from '../APIs/UpdateUserInformation';
 
 export default function UpdateDetailsScreen() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [isOldPasswordVisible, setIsOldPasswordVisible] = useState(false);
+  const [isNewPasswordVisible, setIsNewPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -47,47 +50,81 @@ export default function UpdateDetailsScreen() {
   };
 
   return (
-    <ScreenTemplate>
-      <View style={styles.content}>
-        <Text style={styles.label}>Update Username</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter new username"
-          value={username}
-          onChangeText={setUsername}
-        />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={{ flex: 1 }}>
+        <ScreenTemplate>
+          <View style={styles.content}>
+            <Text style={styles.label}>Update Username</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter new username"
+              value={username}
+              onChangeText={setUsername}
+            />
 
-        <Text style={styles.label}>Update Email</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter new email"
-          value={email}
-          onChangeText={setEmail}
-        />
+            <Text style={styles.label}>Update Email</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter new email"
+              value={email}
+              onChangeText={setEmail}
+            />
 
-        <Text style={styles.label}>Old Password</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter old password"
-          secureTextEntry
-          value={oldPassword}
-          onChangeText={setOldPassword}
-        />
+            <Text style={styles.label}>Old Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={[styles.input, styles.passwordInput]}
+                placeholder="Enter old password"
+                secureTextEntry={!isOldPasswordVisible}
+                value={oldPassword}
+                onChangeText={setOldPassword}
+              />
+              <TouchableOpacity
+                onPress={() => setIsOldPasswordVisible((prev) => !prev)}
+                style={styles.toggleIcon}
+              >
+                <Ionicons
+                  name={isOldPasswordVisible ? 'eye-off' : 'eye'}
+                  size={24}
+                  color="#888"
+                />
+              </TouchableOpacity>
+            </View>
 
-        <Text style={styles.label}>New Password</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter new password (optional)"
-          secureTextEntry
-          value={newPassword}
-          onChangeText={setNewPassword}
-        />
+            <Text style={styles.label}>New Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={[styles.input, styles.passwordInput]}
+                placeholder="Enter new password (optional)"
+                secureTextEntry={!isNewPasswordVisible}
+                value={newPassword}
+                onChangeText={setNewPassword}
+              />
+              <TouchableOpacity
+                onPress={() => setIsNewPasswordVisible((prev) => !prev)}
+                style={styles.toggleIcon}
+              >
+                <Ionicons
+                  name={isNewPasswordVisible ? 'eye-off' : 'eye'}
+                  size={24}
+                  color="#888"
+                />
+              </TouchableOpacity>
+            </View>
 
-        <TouchableOpacity style={styles.updateButton} onPress={handleUpdate} disabled={loading}>
-          <Text style={styles.updateButtonText}>{loading ? 'Updating...' : 'Update Information'}</Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.updateButton}
+              onPress={handleUpdate}
+              disabled={loading}
+            >
+              <Text style={styles.updateButtonText}>
+                {loading ? 'Updating...' : 'Update Information'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScreenTemplate>
       </View>
-    </ScreenTemplate>
+    </TouchableWithoutFeedback>
   );
 }
 
@@ -116,18 +153,35 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     fontFamily: 'Montserrat',
   },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+  },
+  passwordInput: {
+    flex: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    height: 40,
+    fontSize: 16,
+    paddingHorizontal: 10,
+    fontFamily: 'Montserrat',
+  },
+  toggleIcon: {
+    marginLeft: 10,
+    marginTop: -35,
+  },
   updateButton: {
-    width: '75%',
+    width: '60%',
     backgroundColor: '#007AFF',
     paddingVertical: 12,
     alignItems: 'center',
     borderRadius: 5,
-    marginTop: 15,
+    marginTop: 10,
   },
   updateButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: 'bold',
     textTransform: 'uppercase',
     fontFamily: 'Montserrat',
   },

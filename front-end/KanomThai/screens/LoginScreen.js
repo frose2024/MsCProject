@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { View, TextInput, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import axios from 'axios';
+import { View, TextInput, Text, TouchableOpacity, StyleSheet, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
 import ScreenTemplate from '../components/ScreenTemplate';
-import { login } from '../APIs.js/LoginAndRegistration';
+import { login } from '../APIs/LoginAndRegistration';
 
 const decodeJWT = (token) => {
   try {
@@ -22,79 +23,89 @@ const decodeJWT = (token) => {
   }
 };
 
-
-export default function LoginScreen({ navigation, setIsLoggedIn, setIsAdmin, setUserId, }) {
+export default function LoginScreen({ navigation, setIsLoggedIn, setIsAdmin, setUserId }) {
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const handleLogin = async () => {
     try {
       const response = await login(identifier, password);
-      console.log('Login response:', response);
-  
       const { role, token } = response || {};
-  
-      // Decode the token to extract userId
       const decodedToken = decodeJWT(token);
       const userId = decodedToken?.userId;
-  
-      // Verify that userId and token are present
+
       if (!userId || !token) {
         throw new Error('Login response is missing userId or token.');
       }
-  
-      // Log to confirm successful login and extracted values
-      console.log('Login successful. userId:', userId, 'role:', role, 'token:', token);
-  
-      // Set state and navigate
-      setIsLoggedIn(true);
+
+      await AsyncStorage.setItem('token', token);
+      await AsyncStorage.setItem('userId', userId);
+
+      setUserId(userId);
       setIsAdmin(role === 'admin');
-      setUserId(userId);  // Ensure setUserId is defined and correctly setting the state
-      setToken(token);     // Ensure setToken is defined and correctly setting the state
-  
-      navigation.navigate('MainTabs');
+      setIsLoggedIn(true);
     } catch (error) {
       console.error('Login failed:', error);
       Alert.alert('Login Error', error.message || 'An unexpected error occurred.');
     }
-  };  
-  
+  };
+
   return (
-    <ScreenTemplate>
-      <View style={styles.formContainer}>
-      
-        <TextInput
-          placeholder="Username or Email"
-          value={identifier}
-          onChangeText={setIdentifier}
-          style={styles.input}
-        />
-      
-        <TextInput
-          placeholder="Password"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          style={styles.input}
-        />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <View style={{ flex: 1 }}>
+        <ScreenTemplate>
+          <View style={styles.formContainer}>
+            <TextInput
+              placeholder="Username or Email"
+              value={identifier}
+              onChangeText={setIdentifier}
+              style={styles.input}
+            />
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-          <Text style={styles.loginButtonText}> LOGIN </Text>
-        </TouchableOpacity>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!isPasswordVisible}
+                style={[styles.input, styles.passwordInput]}
+              />
+              <TouchableOpacity
+                onPress={() => setIsPasswordVisible((prev) => !prev)}
+                style={styles.toggleIcon}
+              >
+                <Ionicons
+                  name={isPasswordVisible ? 'eye-off' : 'eye'}
+                  size={24}
+                  color="#888"
+                />
+              </TouchableOpacity>
+            </View>
 
-        <TouchableOpacity onPress={() => navigation.navigate('Registration')}>
-         <Text style={styles.registerLink}> Don't have an account? Register here. </Text>
-        </TouchableOpacity>
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+              <Text style={styles.loginButtonText}>LOGIN</Text>
+            </TouchableOpacity>
 
+            <TouchableOpacity onPress={() => navigation.navigate('Registration')}>
+              <Text style={styles.registerLink}>
+                Don't have an account? Register here.
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScreenTemplate>
       </View>
-    </ScreenTemplate>
-    );
+    </TouchableWithoutFeedback>
+  );
 }
 
 const styles = StyleSheet.create({
   formContainer: {
     paddingHorizontal: 20,
     alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    paddingBottom: -60,
   },
   input: {
     width: '100%',
@@ -104,7 +115,25 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     fontSize: 16,
     paddingHorizontal: 10,
-    fontFamily: 'Montserrat'
+    fontFamily: 'Montserrat',
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 20,
+  },
+  passwordInput: {
+    flex: 1,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+    height: 40,
+    fontSize: 16,
+    paddingHorizontal: 10,
+    fontFamily: 'Montserrat',
+  },
+  toggleIcon: {
+    marginLeft: 10,
   },
   loginButton: {
     width: '75%',
@@ -126,6 +155,6 @@ const styles = StyleSheet.create({
     color: '#007AFF',
     marginTop: 20,
     fontSize: 16,
-    fontFamily: 'Montserrat'
+    fontFamily: 'Montserrat',
   },
 });

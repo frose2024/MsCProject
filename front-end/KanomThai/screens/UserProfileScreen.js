@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, Button } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 import ScreenTemplate from '../components/ScreenTemplate';
-import { getProfile, updateBirthday } from '../APIs.js/GetProfile';
+import { getProfile, updateBirthday } from '../APIs/GetProfile';
 import ProgressBar from '../components/ProgressBar';
 
 export default function UserProfileScreen({ navigation }) {
@@ -11,12 +11,12 @@ export default function UserProfileScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [birthday, setBirthday] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         const data = await getProfile();
-        console.log('Fetched profile data:', data);
         setProfile(data);
         if (data.birthday) {
           setBirthday(new Date(data.birthday));
@@ -32,42 +32,52 @@ export default function UserProfileScreen({ navigation }) {
   }, []);
 
   const handleBirthdayChange = (event, selectedDate) => {
-    if (selectedDate) {
-      const currentDate = selectedDate || birthday;
-      setBirthday(currentDate);
-
-      updateBirthday(currentDate)
-        .then(() => Alert.alert("Birthday updated successfully!"))
-        .catch(err => Alert.alert("Error updating birthday", err.message));
+    if (event.type === 'set' && selectedDate) {
+      setBirthday(selectedDate);
+      updateBirthday(selectedDate)
+        .then(() => Alert.alert('Birthday updated successfully!'))
+        .catch((err) => Alert.alert('Error updating birthday', err.message));
     }
   };
 
-  const formattedBirthday = birthday.toLocaleDateString("en-GB", {
+  const formattedBirthday = new Date(birthday).toLocaleDateString('en-GB', {
     day: '2-digit',
     month: '2-digit',
+    year: 'numeric',
   });
 
   return (
     <ScreenTemplate>
       <View style={styles.content}>
         <View style={styles.usernameContainer}>
-          <Text style={styles.usernameText}> Hello, {profile?.username?.toUpperCase() || 'N/A'}
+          <Text style={styles.usernameText}>
+            Hello, {profile?.username?.toUpperCase() || 'N/A'}
           </Text>
         </View>
 
         <TouchableOpacity onPress={() => navigation.navigate('UpdateDetails')}>
-          <Text style={styles.updateLink}>Would you like to update your login details?</Text>
+          <Text style={styles.updateLink}>
+            Would you like to update your login details?
+          </Text>
         </TouchableOpacity>
 
-        <Text style={styles.label}>Your birthday has been set to the {formattedBirthday}</Text>
+        <Text style={styles.label}>Your birthday has been set to {formattedBirthday}</Text>
 
-        <DateTimePicker
-          value={birthday}
-          mode="date"
-          display="default"
-          onChange={handleBirthdayChange}
-          style={styles.datePicker}
-        />
+        <View style={styles.buttonContainer}>
+          <Button title="Change Birthday" onPress={() => setShowDatePicker(true)} />
+        </View>
+
+        {showDatePicker && (
+          <View style={styles.overlay}>
+            <DateTimePicker
+              value={birthday}
+              mode="date"
+              display="default"
+              onChange={handleBirthdayChange}
+              onTouchCancel={() => setShowDatePicker(false)}
+            />
+          </View>
+        )}
 
         {typeof profile?.points === 'number' && (
           <View style={styles.progressBarContainer}>
@@ -99,10 +109,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: '#FFFFFF',
     fontFamily: 'Montserrat',
-    textTransform: 'uppercase',
   },
   updateLink: {
-    fontsize: 16,
+    fontSize: 16,
     color: '#007AFF',
     fontFamily: 'Montserrat',
     textDecorationLine: 'underline',
@@ -113,12 +122,13 @@ const styles = StyleSheet.create({
     color: '#333',
     fontFamily: 'Montserrat',
     marginBottom: 10,
+    textAlign: 'center',
   },
   datePicker: {
     marginBottom: 80,
   },
   progressBarContainer: {
-    marginTop: 20,
+    marginTop: 70,
     width: '80%',
   },
 });

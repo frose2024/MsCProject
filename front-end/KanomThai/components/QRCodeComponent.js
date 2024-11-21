@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Image, Text, ActivityIndicator, StyleSheet } from 'react-native';
 
-import { fetchQRCode } from '../APIs.js/FetchQR';
+import { fetchQRCode } from '../APIs/FetchQR';
 
-const QRCodeComponent = ({ userId, token }) => {
+const QRCodeComponent = ({ userId }) => {
   const [qrCode, setQrCode] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -11,19 +11,20 @@ const QRCodeComponent = ({ userId, token }) => {
     const getQRCode = async () => {
       try {
         // Debug: console.log('Fetching QR code for userId:', userId);
-        await fetchQRCode(userId, token, setQrCode);
+        await fetchQRCode(userId, setQrCode);
       } catch (error) {
-        console.error('Error loading QR code:', error);
+        console.error('Error loading QR code:', error.message);
       } finally {
         setLoading(false);
       }
     };
 
-    if (userId && token) {
+    if (userId) {
       getQRCode();
     }
-  }, [userId, token]);
+  }, [userId]);
 
+  
   return (
     <View style={styles.qrCodeContainer}>
       {loading ? (

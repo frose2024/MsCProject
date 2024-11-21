@@ -1,19 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import ScreenTemplate from '../components/ScreenTemplate';
 import QRCodeComponent from '../components/QRCodeComponent';
 
-export default function UserHomeScreen({ handleLogout, userId, token }) {
-   //Debug: console.log('UserHomeScreen userId:', userId, 'token:', token);
+export default function UserHomeScreen({ handleLogout }) {
+  const [userId, setUserId] = useState(null);
+  const [token, setToken] = useState(null);
+  
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const storedUserId = await AsyncStorage.getItem('userId');
+        const storedToken = await AsyncStorage.getItem('token');
+        setUserId(storedUserId);
+        setToken(storedToken);
+        // Debug: console.log('UserHomeScreen userId:', storedUserId, 'token:', storedToken);
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    };
+
+    loadUserData();
+  }, []);
 
   return (
-    
     <ScreenTemplate>
       <View style={styles.container}>
-        {/* Central square for QR code */}
         <View style={styles.qrCodeContainer}>
-          <QRCodeComponent userId={userId} token={token} />
+          {userId && token ? (
+            <QRCodeComponent userId={userId} token={token} />
+          ) : (
+            <Text>Loading QR Code...</Text>
+          )}
         </View>
 
         <View style={styles.footer}>
@@ -60,6 +80,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 5,
     marginTop: 20,
+    fontWeight: 'bold',
   },
   logoutButtonText: {
     fontSize: 16,

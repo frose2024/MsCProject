@@ -1,8 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { TouchableOpacity, Text } from 'react-native';
 
-import { logout } from '../APIs.js/Logout';
-
 export default function LogoutButton() {
   const navigation = useNavigation();
 
