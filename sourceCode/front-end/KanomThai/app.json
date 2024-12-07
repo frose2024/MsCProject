@@ -1,0 +1,46 @@
+{
+  "expo": {
+    "name": "KanomThai",
+    "scheme": "kanomthai",
+    "slug": "KanomThai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.frose2024.KanomThai",
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app requires access to the camera for scanning QR codes."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.frose2024.KanomThai"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      [
+        "expo-font",
+        {
+          "Montserrat": "./assets/fonts/Montserrat-Regular.ttf"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "1b99be5e-2f6e-41a0-bcf9-ac1bdb639da8"
+      }
+    }
+  }
+}
